@@ -20,8 +20,8 @@ app.add_middleware(
 from app.routers import auth
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
-# from app.routers import vehicles
-# app.include_router(vehicles.router, prefix="/vehicles", tags=["vehicles"])
+from app.routers import vehicles
+app.include_router(vehicles.router, prefix="/vehicles", tags=["vehicles"])
 
 # from app.routers import drivers
 # app.include_router(drivers.router, prefix="/drivers", tags=["drivers"])
