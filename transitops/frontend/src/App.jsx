@@ -4,7 +4,7 @@
    */
   import { Routes, Route, Navigate } from 'react-router-dom'
   import { useAuth } from './context/AuthContext'
-
+  import Navbar from './components/common/Navbar.jsx'
   import LoginPage from './pages/LoginPage.jsx'
   import SignupPage from './pages/SignupPage.jsx'
   import VehicleRegistryPage from './pages/VehicleRegistryPage.jsx'
@@ -12,14 +12,19 @@
   import TripManagementPage from './pages/TripManagementPage.jsx'
   import MaintenancePage from './pages/MaintenancePage.jsx'
   import FuelExpensePage from './pages/FuelExpensePage.jsx'
-  // import DashboardPage from './pages/DashboardPage.jsx'
-  // import ReportsPage from './pages/ReportsPage.jsx'
+  import DashboardPage from './pages/DashboardPage.jsx'
+  import ReportsPage from './pages/ReportsPage.jsx'
 
   function ProtectedRoute({ children }) {
-    const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading } = useAuth()
     if (loading) return null
     if (!isAuthenticated) return <Navigate to="/login" replace />
-    return children
+    return (
+      <>
+        <Navbar />
+        {children}
+      </>
+    )
   }
 
   function App() {
@@ -32,9 +37,10 @@
         <Route path="/trips" element={<ProtectedRoute><TripManagementPage /></ProtectedRoute>} />
         <Route path="/maintenance" element={<ProtectedRoute><MaintenancePage /></ProtectedRoute>} />
         <Route path="/fuel-expenses" element={<ProtectedRoute><FuelExpensePage /></ProtectedRoute>} />
-        {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
-        {/* <Route path="/reports" element={<ReportsPage />} /> */}
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     )
   }

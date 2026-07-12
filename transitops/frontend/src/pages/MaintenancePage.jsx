@@ -246,30 +246,20 @@ const MaintenancePage = () => {
     };
 
     const handleCreate = async (e) => {
-
-        e.preventDefault();
-
-        try {
-
-            await createMaintenance(formData);
-
-            setShowModal(false);
-
-            resetForm();
-
-            loadData();
-
-        }
-
-        catch (err) {
-
-            console.error(err);
-
-            alert("Unable to create maintenance record.");
-
-        }
-
-    };
+    e.preventDefault();
+    try {
+        await createMaintenance({
+            vehicle_id: Number(formData.vehicleId),
+            description: formData.description,
+        });
+        setShowModal(false);
+        resetForm();
+        loadData();
+    } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.detail || "Unable to create maintenance record.");
+    }
+};
 
     const openCloseModal = (record) => {
 
@@ -834,9 +824,7 @@ const MaintenancePage = () => {
                                                 value={vehicle.id}
                                             >
 
-                                                {vehicle.registrationNumber ||
-                                                    vehicle.registration ||
-                                                    vehicle.vehicleNumber}
+                                                {vehicle.registration_number}
 
                                             </option>
 

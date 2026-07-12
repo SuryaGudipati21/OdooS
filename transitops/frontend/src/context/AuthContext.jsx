@@ -26,23 +26,20 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-
         const savedUser = localStorage.getItem("user");
-
         const savedToken = localStorage.getItem("token");
 
-        if (savedUser && savedToken) {
-
-            setUser(JSON.parse(savedUser));
-
-            setToken(savedToken);
-
-            setIsAuthenticated(true);
-
+        if (savedUser && savedToken && savedUser !== "undefined") {
+            try {
+                setUser(JSON.parse(savedUser));
+                setToken(savedToken);
+                setIsAuthenticated(true);
+            } catch (e) {
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+            }
         }
-
         setLoading(false);
-
     }, []);
 
     const login = async (email, password) => {
@@ -59,7 +56,7 @@ export const AuthProvider = ({ children }) => {
                 response.data.token;
 
             const loggedUser =
-                response.data.user;
+                response.data.user || { email, role: response.data.role };
 
             localStorage.setItem(
                 "token",
@@ -118,8 +115,6 @@ export const AuthProvider = ({ children }) => {
         token,
 
         loading,
-
-        loginLoading,
 
         login,
 
