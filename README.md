@@ -172,10 +172,10 @@ Seed data also includes 5 vehicles and 5 drivers in varied statuses (including o
 
 | Role | Responsibilities |
 |---|---|
-| Dev A — Backend Core | Database schema, migrations, auth/RBAC, Vehicle & Driver CRUD, Fuel/Expense endpoints, seed data |
-| Dev B — Business Logic | Trip state machine, maintenance workflow logic, validation rules, backend tests |
-| Dev C — Frontend Core | Login/Signup, Vehicle/Driver/Trip/Maintenance/Fuel screens |
-| Dev D — Dashboard & Reports | Shared UI components, KPI dashboard, analytics/reports, deployment |
+| G N V Surya Teja — Backend Core | Database schema, migrations, auth/RBAC, Vehicle & Driver CRUD, Fuel/Expense endpoints, seed data |
+| K Tharachand Chowdary — Business Logic | Trip state machine, maintenance workflow logic, validation rules, backend tests |
+| G Sanjay Prakash — Frontend Core | Login/Signup, Vehicle/Driver/Trip/Maintenance/Fuel screens |
+| G Pardha Saradhi — Dashboard & Reports | Shared UI components, KPI dashboard, analytics/reports, deployment |
 
 ---
 
