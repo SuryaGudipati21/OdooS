@@ -1,6 +1,3 @@
-"""
-Owner: Dev B
-"""
 import enum
 from sqlalchemy import Column, Integer, String, Float, DateTime, Enum, ForeignKey
 from app.database import Base
