@@ -26,11 +26,11 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 # from app.routers import drivers
 # app.include_router(drivers.router, prefix="/drivers", tags=["drivers"])
 
-# from app.routers import trips
-# app.include_router(trips.router, prefix="/trips", tags=["trips"])
+from app.routers import trips
+app.include_router(trips.router, prefix="/trips", tags=["trips"])
 
-# from app.routers import maintenance
-# app.include_router(maintenance.router, prefix="/maintenance", tags=["maintenance"])
+from app.routers import maintenance
+app.include_router(maintenance.router, prefix="/maintenance", tags=["maintenance"])
 
 # from app.routers import fuel_expenses
 # app.include_router(fuel_expenses.router, prefix="/fuel-expenses", tags=["fuel-expenses"])
