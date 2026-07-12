@@ -39,6 +39,8 @@ const TripManagementPage = () => {
 
     const [selectedTrip, setSelectedTrip] = useState(null);
 
+    const [showCompleteModal, setShowCompleteModal] = useState(false);
+
     const loadData = async () => {
 
         try {
@@ -369,13 +371,13 @@ const TripManagementPage = () => {
 
                                     <td className="px-6 py-4">
 
-                                        {trip.vehicle_name}
+                                        {trip.vehicle?.registration_number || "-"}
 
                                     </td>
 
                                     <td className="px-6 py-4">
 
-                                        {trip.driver_name}
+                                        {trip.driver?.name || "-"}
 
                                     </td>
 
@@ -453,6 +455,7 @@ const TripManagementPage = () => {
                                                     onClick={() => {
 
                                                         setSelectedTrip(trip);
+                                                        setShowCompleteModal(true);
 
                                                     }}
 
@@ -538,11 +541,153 @@ const TripManagementPage = () => {
                 </div>
 
             )}
+
+            {/* Complete Trip Modal */}
+
+            {showCompleteModal && selectedTrip && (
+
+                <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-8">
+
+                        <h2 className="text-2xl font-bold mb-6">
+                            Complete Trip
+                        </h2>
+
+                        <CompleteTripForm
+                            trip={selectedTrip}
+                            onClose={() => {
+                                setShowCompleteModal(false);
+                                setSelectedTrip(null);
+                                loadData();
+                            }}
+                        />
+
+                    </div>
+
+                </div>
+
+            )}
                 </div>
 
             );
 
         };
+
+        const CompleteTripForm = ({ trip, onClose }) => {
+
+            const [saving, setSaving] = useState(false);
+
+            const [error, setError] = useState("");
+
+            const [form, setForm] = useState({
+                final_odometer: "",
+                fuel_consumed: "",
+            });
+
+            const handleChange = (e) => {
+                setForm({
+                    ...form,
+                    [e.target.name]: e.target.value,
+                });
+            };
+
+            const handleSubmit = async (e) => {
+
+                e.preventDefault();
+
+                setError("");
+
+                if (!form.final_odometer || !form.fuel_consumed) {
+                    setError("Please fill in both fields.");
+                    return;
+                }
+
+                try {
+
+                    setSaving(true);
+
+                    await completeTrip(trip.id, {
+                        final_odometer: Number(form.final_odometer),
+                        fuel_consumed: Number(form.fuel_consumed),
+                    });
+
+                    onClose();
+
+                } catch (err) {
+
+                    setError(
+                        err.response?.data?.detail ||
+                        "Unable to complete trip."
+                    );
+
+                } finally {
+
+                    setSaving(false);
+
+                }
+
+            };
+
+            return (
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+
+                    {error && (
+                        <div className="bg-red-100 border border-red-300 text-red-700 rounded-lg p-3">
+                            {error}
+                        </div>
+                    )}
+
+                    <div>
+                        <label className="font-medium">Final Odometer (km)</label>
+                        <input
+                            type="number"
+                            className="w-full border rounded-lg p-3 mt-2"
+                            name="final_odometer"
+                            value={form.final_odometer}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="font-medium">Fuel Consumed (L)</label>
+                        <input
+                            type="number"
+                            className="w-full border rounded-lg p-3 mt-2"
+                            name="fuel_consumed"
+                            value={form.fuel_consumed}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="border rounded-lg px-6 py-3"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            disabled={saving}
+                            className="bg-purple-700 hover:bg-purple-800 text-white rounded-lg px-6 py-3"
+                        >
+                            {saving ? "Completing..." : "Complete Trip"}
+                        </button>
+
+                    </div>
+
+                </form>
+
+            );
+
+        };
+
         const TripForm = ({ vehicles, drivers, loadData, onClose }) => {
 
     const [saving, setSaving] = useState(false);
@@ -601,13 +746,13 @@ const TripManagementPage = () => {
 
             Number(form.cargo_weight) >
 
-            Number(vehicle.maximum_load_capacity)
+            Number(vehicle.max_load_capacity)
 
         ) {
 
             setError(
 
-                `Cargo exceeds vehicle capacity (${vehicle.maximum_load_capacity} kg).`
+                `Cargo exceeds vehicle capacity (${vehicle.max_load_capacity} kg).`
 
             );
 
