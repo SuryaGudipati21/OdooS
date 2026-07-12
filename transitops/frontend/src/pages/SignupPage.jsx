@@ -3,6 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, UserPlus, Truck } from "lucide-react";
 import { signupUser } from "../api/authApi";
 
+const ROLE_VALUE_MAP = {
+    "Fleet Manager": "fleet_manager",
+    "Driver": "driver",
+    "Safety Officer": "safety_officer",
+    "Financial Analyst": "financial_analyst",
+};
+
 const SignupPage = () => {
     const navigate = useNavigate();
 
@@ -75,7 +82,7 @@ const SignupPage = () => {
             await signupUser({
                 name: formData.name,
                 email: formData.email,
-                role: formData.role,
+                role: ROLE_VALUE_MAP[formData.role] || "fleet_manager",
                 password: formData.password,
             });
 
@@ -84,7 +91,7 @@ const SignupPage = () => {
             );
 
             setTimeout(() => {
-                navigate("/");
+                navigate("/login");
             }, 1500);
 
         } catch (err) {
@@ -344,7 +351,7 @@ const SignupPage = () => {
                         Already have an account?
 
                         <Link
-                            to="/"
+                            to="/login"
                             className="ml-2 text-purple-700 font-semibold"
                         >
 

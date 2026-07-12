@@ -116,7 +116,7 @@ const confirmDelete = async () => {
                 ?.toLowerCase()
                 .includes(searchTerm.toLowerCase()) ||
 
-            vehicle.vehicle_name
+            vehicle.name_model
                 ?.toLowerCase()
                 .includes(searchTerm.toLowerCase());
 
@@ -417,7 +417,7 @@ const confirmDelete = async () => {
 
                                     <td className="p-4">
 
-                                        {vehicle.vehicle_name}
+                                        {vehicle.name_model}
 
                                     </td>
 
@@ -429,7 +429,7 @@ const confirmDelete = async () => {
 
                                     <td className="p-4">
 
-                                        {vehicle.maximum_load_capacity}
+                                        {vehicle.max_load_capacity}
 
                                     </td>
 
@@ -699,6 +699,196 @@ const confirmDelete = async () => {
 </div>
 
 );
+
+};
+
+const VehicleForm = ({ vehicle, onClose }) => {
+
+    const isEdit = vehicle !== null;
+
+    const [saving, setSaving] = useState(false);
+
+    const [error, setError] = useState("");
+
+    const [form, setForm] = useState({
+        registration_number: vehicle?.registration_number || "",
+        name_model: vehicle?.name_model || "",
+        type: vehicle?.type || "Truck",
+        max_load_capacity: vehicle?.max_load_capacity ?? "",
+        odometer: vehicle?.odometer ?? 0,
+        acquisition_cost: vehicle?.acquisition_cost ?? "",
+        status: vehicle?.status || "Available",
+    });
+
+    const handleChange = (e) => {
+        setForm({
+            ...form,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handleSubmit = async (e) => {
+
+        e.preventDefault();
+
+        setError("");
+        setSaving(true);
+
+        try {
+
+            const payload = {
+                ...form,
+                max_load_capacity: Number(form.max_load_capacity),
+                odometer: Number(form.odometer),
+                acquisition_cost: Number(form.acquisition_cost),
+            };
+
+            if (isEdit) {
+                await updateVehicle(vehicle.id, payload);
+            } else {
+                await createVehicle(payload);
+            }
+
+            onClose();
+
+        } catch (err) {
+
+            setError(
+                err.response?.data?.detail ||
+                "Unable to save vehicle."
+            );
+
+        } finally {
+
+            setSaving(false);
+
+        }
+
+    };
+
+    return (
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+
+            {error && (
+                <div className="bg-red-100 border border-red-300 text-red-700 rounded-lg p-3">
+                    {error}
+                </div>
+            )}
+
+            <div className="grid md:grid-cols-2 gap-5">
+
+                <div>
+                    <label className="font-medium">Registration Number</label>
+                    <input
+                        className="w-full border rounded-lg p-3 mt-2"
+                        name="registration_number"
+                        value={form.registration_number}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label className="font-medium">Vehicle / Model Name</label>
+                    <input
+                        className="w-full border rounded-lg p-3 mt-2"
+                        name="name_model"
+                        value={form.name_model}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label className="font-medium">Type</label>
+                    <select
+                        className="w-full border rounded-lg p-3 mt-2"
+                        name="type"
+                        value={form.type}
+                        onChange={handleChange}
+                    >
+                        <option>Truck</option>
+                        <option>Van</option>
+                        <option>Mini Truck</option>
+                        <option>Trailer</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className="font-medium">Max Load Capacity (kg)</label>
+                    <input
+                        type="number"
+                        className="w-full border rounded-lg p-3 mt-2"
+                        name="max_load_capacity"
+                        value={form.max_load_capacity}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label className="font-medium">Odometer (km)</label>
+                    <input
+                        type="number"
+                        className="w-full border rounded-lg p-3 mt-2"
+                        name="odometer"
+                        value={form.odometer}
+                        onChange={handleChange}
+                    />
+                </div>
+
+                <div>
+                    <label className="font-medium">Acquisition Cost</label>
+                    <input
+                        type="number"
+                        className="w-full border rounded-lg p-3 mt-2"
+                        name="acquisition_cost"
+                        value={form.acquisition_cost}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label className="font-medium">Status</label>
+                    <select
+                        className="w-full border rounded-lg p-3 mt-2"
+                        name="status"
+                        value={form.status}
+                        onChange={handleChange}
+                    >
+                        <option>Available</option>
+                        <option>On Trip</option>
+                        <option>In Shop</option>
+                        <option>Retired</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div className="flex justify-end gap-3 pt-6">
+
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="border px-6 py-3 rounded-lg"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    disabled={saving}
+                    className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-3 rounded-lg"
+                >
+                    {saving ? "Saving..." : isEdit ? "Update Vehicle" : "Create Vehicle"}
+                </button>
+
+            </div>
+
+        </form>
+
+    );
 
 };
 
