@@ -6,7 +6,7 @@ from app.core.security import get_current_user
 from pydantic import BaseModel
 
 router = APIRouter()
-
+#Vechicles
 class VehicleCreate(BaseModel):
     registration_number: str
     name_model: str
