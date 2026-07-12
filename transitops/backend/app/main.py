@@ -23,8 +23,8 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 from app.routers import vehicles
 app.include_router(vehicles.router, prefix="/vehicles", tags=["vehicles"])
 
-# from app.routers import drivers
-# app.include_router(drivers.router, prefix="/drivers", tags=["drivers"])
+from app.routers import drivers
+app.include_router(drivers.router, prefix="/drivers", tags=["drivers"])
 
 from app.routers import trips
 app.include_router(trips.router, prefix="/trips", tags=["trips"])
