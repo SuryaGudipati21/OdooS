@@ -69,3 +69,5 @@ export const resetPassword = async (resetData) => {
         resetData
     );
 };
+
+export { api }
