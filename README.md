@@ -1,6 +1,6 @@
 # TransitOps — Smart Transport Operations Platform
 
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](./Screenshots/dashboard.png)
 
 A centralized platform for managing the complete lifecycle of transport operations — vehicle registry, driver management, trip dispatching, maintenance workflows, and fuel/expense tracking — built for an 8-hour hackathon.
 
@@ -38,17 +38,16 @@ Replaces spreadsheets and manual logbooks with a single system that enforces bus
   - Drivers with expired licenses or Suspended status are rejected
   - A vehicle or driver already On Trip cannot be double-assigned
 
-![Trip validation rejecting an over-capacity or expired-license assignment](./screenshots/trip-validation.png)
+![Trip validation rejecting an over-capacity or expired-license assignment](./Screenshots/trip-validation.png)
 
 - [x] Automatic status transitions — dispatching a trip sets vehicle + driver to "On Trip"; completing/cancelling reverts both to "Available"
 - [x] Maintenance workflow — creating an active maintenance record automatically sets the vehicle to "In Shop"; closing it restores "Available" (unless Retired)
 
-![Vehicle status automatically switching to In Shop on an active maintenance record](./screenshots/maintenance-status.png)
+![Vehicle status automatically switching to In Shop on an active maintenance record](./Screenshots/maintenance-status.png)
 
 - [x] Fuel & Expense logging with automatic per-vehicle operational cost rollup
 - [x] Dashboard with live KPIs (Active/Available Vehicles, Active Trips, Drivers On Duty, Fleet Utilization %)
 
-![Dashboard KPI cards and Recent Trips table](./screenshots/dashboard-kpis.png)
 
 - [x] Responsive UI across all core screens
 
@@ -152,16 +151,16 @@ Seed data also includes 5 vehicles and 5 drivers in varied statuses (including o
 2. Register driver Alex with a valid license
 3. Create a trip with 450 kg cargo — system validates 450 ≤ 500 and allows it
 
-![Trip creation form with cargo validation](./screenshots/trip-create.png)
+![Trip creation form with cargo validation](./Screenshots/trip-create.png)
 
 4. Dispatch the trip — vehicle and driver both automatically flip to "On Trip"
 
-![Vehicle and driver status both showing On Trip after dispatch](./screenshots/dispatch-status.png)
+![Vehicle and driver status both showing On Trip after dispatch](./Screenshots/dispatch-status.png)
 
 5. Complete the trip, entering final odometer and fuel consumed
 6. Vehicle and driver both automatically revert to "Available"
 
-![Trip marked Completed with vehicle and driver back to Available](./screenshots/trip-complete.png)
+![Trip marked Completed with vehicle and driver back to Available](./Screenshots/trip-complete.png)
 
 7. Create a maintenance record (e.g. Oil Change) — vehicle automatically becomes "In Shop" and disappears from trip-assignment dropdowns
 8. Close the maintenance record — vehicle returns to "Available"
