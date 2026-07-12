@@ -17,8 +17,8 @@ app.add_middleware(
 )
 
 # --- Register routers below, one line per person ---
-# from app.routers import auth
-# app.include_router(auth.router, prefix="/auth", tags=["auth"])
+from app.routers import auth
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 # from app.routers import vehicles
 # app.include_router(vehicles.router, prefix="/vehicles", tags=["vehicles"])
