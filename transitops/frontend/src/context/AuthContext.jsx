@@ -14,10 +14,11 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-
-    const [user, setUser] = useState(null);
-
-    const [token, setToken] = useState(
+        const [user, setUser] = useState(null);
+        
+        const[loginLoading,setLoginLoading]=useState(false);
+        
+        const [token, setToken] = useState(
         localStorage.getItem("token") || ""
     );
 
@@ -119,7 +120,9 @@ export const AuthProvider = ({ children }) => {
         login,
 
         logout,
-
+       
+        loginLoading,
+       
         isAuthenticated,
 
         role: user?.role || null,
