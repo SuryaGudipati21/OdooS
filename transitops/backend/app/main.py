@@ -35,8 +35,8 @@ app.include_router(maintenance.router, prefix="/maintenance", tags=["maintenance
 from app.routers import fuel_expenses
 app.include_router(fuel_expenses.router, prefix="/fuel-expenses", tags=["fuel-expenses"])
 
-# from app.routers import reports
-# app.include_router(reports.router, prefix="/reports", tags=["reports"])
+from app.routers import reports
+app.include_router(reports.router, prefix="/reports", tags=["reports"])
 
 
 @app.get("/health")
