@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from app.core.security import get_current_user
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.trip import Trip
@@ -12,7 +13,11 @@ def _rule_error(error: trip_service.TripRuleError) -> HTTPException:
 
 
 @router.post("", response_model=TripRead, status_code=status.HTTP_201_CREATED)
-def create_trip(payload: TripCreate, db: Session = Depends(get_db)):
+def create_trip(
+    payload: TripCreate,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
     try:
         return trip_service.create_trip(db, **payload.model_dump())
     except trip_service.TripRuleError as error:

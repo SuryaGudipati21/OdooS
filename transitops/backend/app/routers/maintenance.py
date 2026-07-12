@@ -1,5 +1,6 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from app.core.security import get_current_user
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.maintenance import MaintenanceLog
@@ -13,7 +14,11 @@ def _rule_error(error: maintenance_service.MaintenanceRuleError) -> HTTPExceptio
 
 
 @router.post("", response_model=MaintenanceRead, status_code=status.HTTP_201_CREATED)
-def create_maintenance(payload: MaintenanceCreate, db: Session = Depends(get_db)):
+def create_maintenance(
+    payload: MaintenanceCreate,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
     try:
         return maintenance_service.create_maintenance(db, **payload.model_dump())
     except maintenance_service.MaintenanceRuleError as error:
