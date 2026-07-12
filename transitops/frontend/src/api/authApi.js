@@ -1,7 +1,7 @@
 // frontend/src/api/authApi.js
 
 import axiosClient from "./axiosClient";
-
+import api from"./axiosClient";
 /**
  * Login User
  * POST /auth/login
@@ -69,3 +69,4 @@ export const resetPassword = async (resetData) => {
         resetData
     );
 };
+export default api;

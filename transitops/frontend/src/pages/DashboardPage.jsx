@@ -1,48 +1,55 @@
 import { useEffect, useState } from "react";
 import Card from "../components/common/Card";
+import { getDashboardKPIs } from "../api/kpiService";
 
 export default function DashboardPage() {
-  const [totalVehicles, setTotalVehicles] = useState(0);
-  const [maintenanceDue, setMaintenanceDue] = useState(0);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Get vehicle data from backend
-    fetch("http://127.0.0.1:8000/vehicles/")
-      .then((response) => response.json())
-      .then((data) => {
-        setTotalVehicles(data.length);
-      })
-      .catch((error) => {
-        console.error("Vehicle API error:", error);
-      });
+    const loadKPIs = async () => {
+      try {
+        const data = await getDashboardKPIs();
 
-    // Get maintenance data from backend
-    fetch("http://127.0.0.1:8000/maintenance")
-      .then((response) => response.json())
-      .then((data) => {
-        setMaintenanceDue(data.length);
-      })
-      .catch((error) => {
-        console.error("Maintenance API error:", error);
-      });
+        console.log("Dashboard KPI data:", data);
+
+        setDashboardData(data);
+      } catch (err) {
+        console.error("Failed to load dashboard KPIs:", err);
+        setError("Unable to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadKPIs();
   }, []);
+
+  if (loading) {
+    return <p>Loading dashboard...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   const kpis = [
     {
       title: "Total Vehicles",
-      value: totalVehicles,
+      value: dashboardData?.total_vehicles ?? 0,
     },
     {
       title: "Active Drivers",
-      value: 18,
+      value: dashboardData?.active_drivers ?? 0,
     },
     {
       title: "Active Trips",
-      value: 8,
+      value: dashboardData?.active_trips ?? 0,
     },
     {
       title: "Maintenance Due",
-      value: maintenanceDue,
+      value: dashboardData?.maintenance_due ?? 0,
     },
   ];
 
