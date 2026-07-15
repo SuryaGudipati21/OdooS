@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_role
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.trip import Trip
@@ -16,7 +16,7 @@ def _rule_error(error: trip_service.TripRuleError) -> HTTPException:
 def create_trip(
     payload: TripCreate,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user),
+    user=Depends(require_role("fleet_manager")),
 ):
     try:
         return trip_service.create_trip(db, **payload.model_dump())
@@ -25,12 +25,12 @@ def create_trip(
 
 
 @router.get("", response_model=list[TripRead])
-def list_trips(db: Session = Depends(get_db)):
+def list_trips(db: Session = Depends(get_db), user=Depends(get_current_user)):
     return db.query(Trip).order_by(Trip.created_at.desc()).all()
 
 
 @router.get("/{trip_id}", response_model=TripRead)
-def get_trip(trip_id: int, db: Session = Depends(get_db)):
+def get_trip(trip_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
     trip = db.get(Trip, trip_id)
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
@@ -38,7 +38,7 @@ def get_trip(trip_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{trip_id}/dispatch", response_model=TripRead)
-def dispatch_trip(trip_id: int, db: Session = Depends(get_db)):
+def dispatch_trip(trip_id: int, db: Session = Depends(get_db), user=Depends(require_role("fleet_manager"))):
     try:
         return trip_service.dispatch_trip(db, trip_id)
     except trip_service.TripRuleError as error:
@@ -46,7 +46,12 @@ def dispatch_trip(trip_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{trip_id}/complete", response_model=TripRead)
-def complete_trip(trip_id: int, payload: TripComplete, db: Session = Depends(get_db)):
+def complete_trip(
+    trip_id: int,
+    payload: TripComplete,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("fleet_manager", "driver")),
+):
     try:
         return trip_service.complete_trip(db, trip_id, **payload.model_dump())
     except trip_service.TripRuleError as error:
@@ -54,7 +59,7 @@ def complete_trip(trip_id: int, payload: TripComplete, db: Session = Depends(get
 
 
 @router.put("/{trip_id}/cancel", response_model=TripRead)
-def cancel_trip(trip_id: int, db: Session = Depends(get_db)):
+def cancel_trip(trip_id: int, db: Session = Depends(get_db), user=Depends(require_role("fleet_manager"))):
     try:
         return trip_service.cancel_trip(db, trip_id)
     except trip_service.TripRuleError as error:

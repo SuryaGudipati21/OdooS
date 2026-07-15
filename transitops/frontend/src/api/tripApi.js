@@ -2,6 +2,7 @@
 
 import axiosClient from "./axiosClient";
 
+
 /**
  * Get all trips
  */
@@ -54,7 +55,7 @@ export const deleteTrip = async (id) => {
  * Dispatch Trip
  */
 export const dispatchTrip = async (id) => {
-    return await axiosClient.patch(
+    return await axiosClient.put(
         `/trips/${id}/dispatch`
     );
 };
@@ -66,7 +67,7 @@ export const completeTrip = async (
     id,
     completionData
 ) => {
-    return await axiosClient.patch(
+    return await axiosClient.put(
         `/trips/${id}/complete`,
         completionData
     );
@@ -79,7 +80,7 @@ export const cancelTrip = async (
     id,
     reason = ""
 ) => {
-    return await axiosClient.patch(
+    return await axiosClient.put(
         `/trips/${id}/cancel`,
         { reason }
     );

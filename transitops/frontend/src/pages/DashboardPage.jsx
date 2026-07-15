@@ -1,9 +1,9 @@
 // Owner: Dev D
-// TODO(Dev D): replace the placeholder arrays below with real calls to
-// kpi_service.py / reports.py once those are built. Structure is ready.
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getTrips } from "../api/tripApi";
 import Card from "../components/common/Card.jsx";
 import Badge from "../components/common/Badge.jsx";
+import { getDashboardKPIs } from "../api/kpiservices";
 
 const STATUS_BADGE_MAP = {
   Draft: "default",
@@ -16,32 +16,71 @@ export default function DashboardPage() {
   const [vehicleType, setVehicleType] = useState("All");
   const [status, setStatus] = useState("All");
   const [search, setSearch] = useState("");
+  const [summary, setSummary] = useState(null);
+  const [recentTrips, setRecentTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // TODO(Dev D): replace with GET /reports/kpis or similar
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        const [kpiData, tripsResponse] = await Promise.all([
+          getDashboardKPIs(),
+          getTrips(),
+        ]);
+        setSummary(kpiData);
+        setRecentTrips(tripsResponse.data.slice(0, 5));
+      } catch (err) {
+        console.error("Failed to load dashboard data:", err);
+        setError("Unable to load dashboard data. Check whether the backend server is running.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <h2>Loading dashboard...</h2>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <h2>Dashboard Error</h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   const kpis = [
-    { title: "Active Vehicles", value: "7", accent: "border-blue-500", valueColor: "text-blue-600" },
-    { title: "Available Vehicles", value: "2", accent: "border-green-500", valueColor: "text-green-600" },
-    { title: "In Maintenance", value: "1", accent: "border-yellow-500", valueColor: "text-yellow-600" },
-    { title: "Active Trips", value: "1", accent: "border-blue-500", valueColor: "text-blue-600" },
-    { title: "Pending Trips", value: "0", accent: "border-gray-400", valueColor: "text-gray-600" },
-    { title: "Drivers On Duty", value: "5", accent: "border-green-500", valueColor: "text-green-600" },
-    { title: "Fleet Utilization", value: "20%", accent: "border-purple-500", valueColor: "text-purple-600" },
+    { title: "Total Vehicles", value: summary.total_vehicles, accent: "border-blue-500", valueColor: "text-blue-600" },
+    { title: "Available Vehicles", value: summary.available_vehicles, accent: "border-green-500", valueColor: "text-green-600" },
+    { title: "In Maintenance", value: summary.in_maintenance_vehicles, accent: "border-yellow-500", valueColor: "text-yellow-600" },
+    { title: "Active Trips", value: summary.active_trips, accent: "border-blue-500", valueColor: "text-blue-600" },
+    { title: "Pending Trips", value: summary.pending_trips, accent: "border-gray-400", valueColor: "text-gray-600" },
+    { title: "Drivers On Duty", value: summary.drivers_on_duty, accent: "border-green-500", valueColor: "text-green-600" },
+    { title: "Fleet Utilization", value: `${summary.fleet_utilization_percent}%`, accent: "border-purple-500", valueColor: "text-purple-600" },
   ];
 
-  // TODO(Dev D): replace with GET /trips?limit=5&sort=recent
-  const recentTrips = [
-    { id: "TR001", vehicle: "VAN-05", driver: "Alex Kumar", status: "Completed", eta: "—" },
-    { id: "TR002", vehicle: "TRK-12", driver: "Priya Sharma", status: "Dispatched", eta: "45 min" },
-    { id: "TR003", vehicle: "—", driver: "—", status: "Draft", eta: "Awaiting vehicle" },
-  ];
-
-  // TODO(Dev D): replace with a count of vehicles grouped by status
-  const vehicleStatusBreakdown = [
-    { label: "Available", count: 2, total: 7, color: "bg-green-500" },
-    { label: "On Trip", count: 1, total: 7, color: "bg-blue-500" },
-    { label: "In Shop", count: 1, total: 7, color: "bg-yellow-500" },
-    { label: "Retired", count: 1, total: 7, color: "bg-red-400" },
-  ];
+  const breakdown = summary.vehicle_status_breakdown || {};
+  const totalForBreakdown = Object.values(breakdown).reduce((a, b) => a + b, 0) || 1;
+  const COLOR_MAP = {
+    available: "bg-green-500",
+    on_trip: "bg-blue-500",
+    in_shop: "bg-yellow-500",
+    retired: "bg-red-400",
+  };
+  const vehicleStatusBreakdown = Object.entries(breakdown).map(([label, count]) => ({
+    label,
+    count,
+    total: totalForBreakdown,
+    color: COLOR_MAP[label] || "bg-gray-400",
+  }));
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -91,46 +130,44 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Trips */}
-        <div className="lg:col-span-2">
-          <Card>
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Recent Trips</h2>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-400 border-b">
-                  <th className="pb-2 font-medium">Trip</th>
-                  <th className="pb-2 font-medium">Vehicle</th>
-                  <th className="pb-2 font-medium">Driver</th>
-                  <th className="pb-2 font-medium">Status</th>
-                  <th className="pb-2 font-medium">ETA</th>
+      {/* Recent Trips */}
+      <div className="lg:col-span-2">
+        <Card>
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Recent Trips</h2>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-gray-400 border-b">
+                <th className="pb-2 font-medium">Trip</th>
+                <th className="pb-2 font-medium">Vehicle ID</th>
+                <th className="pb-2 font-medium">Driver ID</th>
+                <th className="pb-2 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentTrips.map((trip) => (
+                <tr key={trip.id} className="border-b last:border-0">
+                  <td className="py-3 font-medium text-gray-700">TR{String(trip.id).padStart(3, "0")}</td>
+                  <td className="py-3 text-gray-600">{trip.vehicle_id}</td>
+                  <td className="py-3 text-gray-600">{trip.driver_id}</td>
+                  <td className="py-3">
+                    <Badge status={STATUS_BADGE_MAP[trip.status] || "default"}>{trip.status}</Badge>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {recentTrips.map((trip) => (
-                  <tr key={trip.id} className="border-b last:border-0">
-                    <td className="py-3 font-medium text-gray-700">{trip.id}</td>
-                    <td className="py-3 text-gray-600">{trip.vehicle}</td>
-                    <td className="py-3 text-gray-600">{trip.driver}</td>
-                    <td className="py-3">
-                      <Badge status={STATUS_BADGE_MAP[trip.status] || "default"}>{trip.status}</Badge>
-                    </td>
-                    <td className="py-3 text-gray-500">{trip.eta}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        </div>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      </div>
 
-        {/* Vehicle Status Breakdown */}
-        <div>
+      {/* Vehicle Status Breakdown */}
+      <div>
           <Card>
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Vehicle Status</h2>
             <div className="space-y-4">
               {vehicleStatusBreakdown.map((item) => (
                 <div key={item.label}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">{item.label}</span>
+                    <span className="text-gray-600 capitalize">{item.label.replace("_", " ")}</span>
                     <span className="text-gray-400">{item.count}</span>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2">

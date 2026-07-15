@@ -7,9 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_role
 from app.database import get_db
-from app.models.driver import Driver
+from app.models.driver import Driver, DriverStatus
 
 router = APIRouter()
 
@@ -27,7 +27,7 @@ class DriverCreate(BaseModel):
 def create_driver(
     payload: DriverCreate,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user),
+    user=Depends(require_role("fleet_manager", "safety_officer")),
 ):
     existing = (
         db.query(Driver)
@@ -54,6 +54,7 @@ def create_driver(
 def list_drivers(
     status: str | None = None,
     db: Session = Depends(get_db),
+    user=Depends(get_current_user),
 ):
     query = db.query(Driver)
 
@@ -63,10 +64,16 @@ def list_drivers(
     return query.all()
 
 
+@router.get("/available")
+def list_available_drivers(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    return db.query(Driver).filter(Driver.status == DriverStatus.available).all()
+
+
 @router.get("/{driver_id}")
 def get_driver(
     driver_id: int,
     db: Session = Depends(get_db),
+    user=Depends(get_current_user),
 ):
     driver = (
         db.query(Driver)
@@ -88,6 +95,7 @@ def update_driver(
     driver_id: int,
     payload: DriverCreate,
     db: Session = Depends(get_db),
+    user=Depends(require_role("fleet_manager", "safety_officer")),
 ):
     driver = (
         db.query(Driver)
@@ -114,6 +122,7 @@ def update_driver(
 def delete_driver(
     driver_id: int,
     db: Session = Depends(get_db),
+    user=Depends(require_role("fleet_manager")),
 ):
     driver = (
         db.query(Driver)

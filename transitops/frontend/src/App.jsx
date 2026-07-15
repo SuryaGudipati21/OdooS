@@ -38,7 +38,9 @@
         <Route path="/maintenance" element={<ProtectedRoute><MaintenancePage /></ProtectedRoute>} />
         <Route path="/fuel-expenses" element={<ProtectedRoute><FuelExpensePage /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>
+        }
+      />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
