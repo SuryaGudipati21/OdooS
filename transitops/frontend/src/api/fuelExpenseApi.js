@@ -7,21 +7,21 @@ import axiosClient from "./axiosClient";
  * Fuel Logs
  */
 export const getFuelLogs = async (params = {}) => {
-    return await axiosClient.get("/fuel-expenses/fuel-logs", {
+    return await axiosClient.get("/fuel-expenses/fuel", {
         params,
     });
 };
 
 export const createFuelLog = async (fuelData) => {
     return await axiosClient.post(
-        "/fuel-expenses/fuel-logs",
+        "/fuel-expenses/fuel",
         fuelData
     );
 };
 
 export const deleteFuelLog = async (id) => {
     return await axiosClient.delete(
-        `/fuel-expenses/fuel-logs/${id}`
+        `/fuel-expenses/fuel/${id}`
     );
 };
 

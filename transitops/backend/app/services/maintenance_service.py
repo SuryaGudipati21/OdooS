@@ -1,3 +1,6 @@
+from datetime import date, datetime, timezone
+from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app.models.maintenance import MaintenanceLog
@@ -16,7 +19,17 @@ def _commit(db: Session) -> None:
         raise
 
 
-def create_maintenance(db: Session, *, vehicle_id: int, description: str) -> MaintenanceLog:
+def create_maintenance(
+    db: Session,
+    *,
+    vehicle_id: int,
+    description: str,
+    maintenance_type: Optional[str] = None,
+    cost: Optional[float] = None,
+    service_center: Optional[str] = None,
+    scheduled_date: Optional[date] = None,
+    notes: Optional[str] = None,
+) -> MaintenanceLog:
     vehicle = db.get(Vehicle, vehicle_id)
     if not vehicle:
         raise MaintenanceRuleError("Vehicle not found")
@@ -25,7 +38,16 @@ def create_maintenance(db: Session, *, vehicle_id: int, description: str) -> Mai
     if vehicle.status != VehicleStatus.available:
         raise MaintenanceRuleError("Only Available vehicles can enter maintenance")
 
-    log = MaintenanceLog(vehicle_id=vehicle_id, description=description, is_active=True)
+    log = MaintenanceLog(
+        vehicle_id=vehicle_id,
+        description=description,
+        is_active=True,
+        maintenance_type=maintenance_type,
+        cost=cost,
+        service_center=service_center,
+        scheduled_date=scheduled_date,
+        notes=notes,
+    )
     db.add(log)
     vehicle.status = VehicleStatus.in_shop
     _commit(db)
@@ -33,7 +55,13 @@ def create_maintenance(db: Session, *, vehicle_id: int, description: str) -> Mai
     return log
 
 
-def close_maintenance(db: Session, maintenance_id: int) -> MaintenanceLog:
+def close_maintenance(
+    db: Session,
+    maintenance_id: int,
+    *,
+    final_cost: Optional[float] = None,
+    completion_notes: Optional[str] = None,
+) -> MaintenanceLog:
     log = db.get(MaintenanceLog, maintenance_id)
     if not log:
         raise MaintenanceRuleError("Maintenance record not found")
@@ -43,9 +71,12 @@ def close_maintenance(db: Session, maintenance_id: int) -> MaintenanceLog:
     if not vehicle:
         raise MaintenanceRuleError("Vehicle not found")
 
-    from datetime import datetime, timezone
     log.is_active = False
     log.closed_at = datetime.now(timezone.utc)
+    if final_cost is not None:
+        log.final_cost = final_cost
+    if completion_notes is not None:
+        log.completion_notes = completion_notes
     if vehicle.status != VehicleStatus.retired:
         vehicle.status = VehicleStatus.available
     _commit(db)

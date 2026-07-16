@@ -18,8 +18,8 @@ import {
     cancelTrip,
 } from "../api/tripApi";
 
-import { getAvailableVehicles } from "../api/vehicleApi";
-import { getAvailableDrivers } from "../api/driverApi";
+import { getAvailableVehicles, getVehicles } from "../api/vehicleApi";
+import { getAvailableDrivers, getDrivers } from "../api/driverApi";
 
 const TripManagementPage = () => {
 
@@ -28,6 +28,10 @@ const TripManagementPage = () => {
     const [vehicles, setVehicles] = useState([]);
 
     const [drivers, setDrivers] = useState([]);
+
+    const [allVehicles, setAllVehicles] = useState([]);
+
+    const [allDrivers, setAllDrivers] = useState([]);
 
     const [loading, setLoading] = useState(true);
 
@@ -55,6 +59,10 @@ const TripManagementPage = () => {
 
                 driverRes,
 
+                allVehicleRes,
+
+                allDriverRes,
+
             ] = await Promise.all([
 
                 getTrips(),
@@ -63,6 +71,10 @@ const TripManagementPage = () => {
 
                 getAvailableDrivers(),
 
+                getVehicles(),
+
+                getDrivers(),
+
             ]);
 
             setTrips(tripRes.data);
@@ -70,6 +82,10 @@ const TripManagementPage = () => {
             setVehicles(vehicleRes.data);
 
             setDrivers(driverRes.data);
+
+            setAllVehicles(allVehicleRes.data);
+
+            setAllDrivers(allDriverRes.data);
 
         }
 
@@ -92,6 +108,16 @@ const TripManagementPage = () => {
         loadData();
 
     }, []);
+
+    const getVehicleLabel = (vehicleId) => {
+        const vehicle = allVehicles.find((v) => v.id === vehicleId);
+        return vehicle?.registration_number || "-";
+    };
+
+    const getDriverLabel = (driverId) => {
+        const driver = allDrivers.find((d) => d.id === driverId);
+        return driver?.name || "-";
+    };
 
     const filteredTrips = useMemo(() => {
 
@@ -371,13 +397,13 @@ const TripManagementPage = () => {
 
                                     <td className="px-6 py-4">
 
-                                        {trip.vehicle?.registration_number || "-"}
+                                        {getVehicleLabel(trip.vehicle_id)}
 
                                     </td>
 
                                     <td className="px-6 py-4">
 
-                                        {trip.driver?.name || "-"}
+                                        {getDriverLabel(trip.driver_id)}
 
                                     </td>
 

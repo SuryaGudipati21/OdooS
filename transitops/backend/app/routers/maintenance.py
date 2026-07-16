@@ -1,10 +1,9 @@
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_role
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.maintenance import MaintenanceLog
-from app.schemas.maintenance import MaintenanceCreate, MaintenanceRead
+from app.schemas.maintenance import MaintenanceClose, MaintenanceCreate, MaintenanceRead
 from app.services import maintenance_service
 
 router = APIRouter()
@@ -17,7 +16,7 @@ def _rule_error(error: maintenance_service.MaintenanceRuleError) -> HTTPExceptio
 def create_maintenance(
     payload: MaintenanceCreate,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user),
+    user=Depends(require_role("fleet_manager", "safety_officer")),
 ):
     try:
         return maintenance_service.create_maintenance(db, **payload.model_dump())
@@ -26,13 +25,18 @@ def create_maintenance(
 
 
 @router.put("/{maintenance_id}/close", response_model=MaintenanceRead)
-def close_maintenance(maintenance_id: int, db: Session = Depends(get_db)):
+def close_maintenance(
+    maintenance_id: int,
+    payload: MaintenanceClose,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("fleet_manager", "safety_officer")),
+):
     try:
-        return maintenance_service.close_maintenance(db, maintenance_id)
+        return maintenance_service.close_maintenance(db, maintenance_id, **payload.model_dump())
     except maintenance_service.MaintenanceRuleError as error:
         raise _rule_error(error)
 
 
 @router.get("", response_model=list[MaintenanceRead])
-def list_maintenance(db: Session = Depends(get_db)):
+def list_maintenance(db: Session = Depends(get_db), user=Depends(get_current_user)):
     return db.query(MaintenanceLog).order_by(MaintenanceLog.opened_at.desc()).all()

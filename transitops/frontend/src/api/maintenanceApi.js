@@ -48,7 +48,7 @@ export const closeMaintenance = async (
     id,
     completionData = {}
 ) => {
-    return await axiosClient.patch(
+    return await axiosClient.put(
         `/maintenance/${id}/close`,
         completionData
     );

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import axiosClient from "../api/axiosClient";
 import {
   getVehicleReport,
   getDriverReport,
@@ -9,7 +10,27 @@ import {
   getFuelExpenseReport,
   getMaintenanceReport,
   getUsersReport,
-} from "../api/kpiServices";
+} from "../api/kpiservices";
+
+const EXPORTS = [
+  { label: "Vehicles", path: "/reports/export/vehicles.csv", filename: "vehicles.csv" },
+  { label: "Drivers", path: "/reports/export/drivers.csv", filename: "drivers.csv" },
+  { label: "Trips", path: "/reports/export/trips.csv", filename: "trips.csv" },
+  { label: "Fuel Expenses", path: "/reports/export/fuel-expenses.csv", filename: "fuel-expenses.csv" },
+  { label: "Maintenance", path: "/reports/export/maintenance.csv", filename: "maintenance.csv" },
+];
+
+async function downloadCsv(path, filename) {
+  const response = await axiosClient.get(path, { responseType: "blob" });
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
 
 function ReportsPage() {
   const [reportData, setReportData] = useState({
@@ -23,6 +44,7 @@ function ReportsPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [exportError, setExportError] = useState("");
 
   useEffect(() => {
     const loadReports = async () => {
@@ -65,6 +87,16 @@ function ReportsPage() {
     loadReports();
   }, []);
 
+  const handleExport = async (path, filename) => {
+    setExportError("");
+    try {
+      await downloadCsv(path, filename);
+    } catch (err) {
+      console.error(`Failed to export ${filename}:`, err);
+      setExportError(`Failed to export ${filename}.`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -88,6 +120,20 @@ function ReportsPage() {
       <h1 className="text-xl font-semibold">
         Reports and Analytics
       </h1>
+
+      {/* CSV Export */}
+      <div className="flex flex-wrap gap-3 my-4">
+        {EXPORTS.map((exp) => (
+          <button
+            key={exp.path}
+            onClick={() => handleExport(exp.path, exp.filename)}
+            className="border rounded-lg px-3 py-2 bg-white text-sm hover:bg-gray-50"
+          >
+            Export {exp.label} CSV
+          </button>
+        ))}
+      </div>
+      {exportError && <p className="text-red-600 text-sm mb-4">{exportError}</p>}
 
       <hr />
 
