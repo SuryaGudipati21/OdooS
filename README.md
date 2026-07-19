@@ -178,7 +178,14 @@ Seed data also includes 5 vehicles and 5 drivers in varied statuses (including o
 | G Pardha Saradhi — Dashboard & Reports | Shared UI components, KPI dashboard, analytics/reports, deployment |
 
 ---
+## 🚀 Live Demo
 
+- **Frontend (App):** [https://transitops-puce.vercel.app](https://transitops-puce.vercel.app)
+- **Backend (API docs):** [https://transitops-backend-il2e.onrender.com/docs](https://transitops-backend-il2e.onrender.com/docs)
+
+> **Note:** The backend is hosted on Render's free tier, which spins down after ~15 minutes of inactivity. If the app feels stuck on your first request (e.g. login/signup), give it 30–60 seconds to wake up — this is expected and not a bug.
+
+**Tech stack:** FastAPI + PostgreSQL (Neon) backend, React + Vite frontend, deployed on Render and Vercel.
 ## Architecture Notes
 
 - **State machines are centralized**: trip and maintenance status transitions live in dedicated service modules (`services/trip_service.py`, `services/maintenance_service.py`) rather than scattered across route handlers, so the vehicle/driver status fields never drift out of sync with trip/maintenance state.
